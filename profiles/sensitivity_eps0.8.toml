@@ -1,0 +1,37 @@
+# Sensitivity of the interface to the glass-polymer LJ strength: eps x 0.8, restarted from the equilibrated PCL composite replica 1, reheated to 400 K and re-annealed.
+# python run_pipeline.py --profile sensitivity_eps0.8
+
+[system]
+output_dir = "runs/sensitivity_eps0.8"
+
+[forcefield]
+cross_epsilon_scale = 0.8
+
+[mc]
+start_from = "runs/composite_r1/03_equilibration/system_final.npz"
+
+[[mc.stage]]
+name = "reheat"
+ensemble = "npt"
+T = 400.0
+P = 1.0
+moves = 1000
+volume_moves = 10
+
+[[mc.stage]]
+name = "anneal"
+ensemble = "npt"
+T = 400.0
+T_end = 300.0
+P = 1.0
+moves = 2000
+volume_moves = 10
+
+[[mc.stage]]
+name = "production"
+ensemble = "npt"
+T = 300.0
+P = 1.0
+moves = 2000
+volume_moves = 10
+tune = false

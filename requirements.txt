@@ -1,0 +1,18 @@
+# Dependencies of the 45S5 / PCL nanocomposite study.
+#
+# Python >= 3.11 is required (standard-library tomllib); the versions below are the ones this
+# release has been checked with (Python 3.12.13). Install them in a clean virtual environment:
+#
+#     python -m venv .venv && source .venv/bin/activate && pip install -r requirements.txt
+
+# --- system build and structural analysis (CPU) ---
+numpy==1.26.4
+scipy==1.15.3
+numba==0.65.1
+tqdm==4.67.3
+
+# --- hybrid Monte Carlo sampler (needs an NVIDIA GPU) ---
+# CuPy is not pinned: it must match the CUDA toolkit of the machine that runs the sampling.
+#     pip install cupy-cuda12x        # CUDA 12
+#     pip install cupy-cuda11x        # CUDA 11
+cupy-cuda12x

@@ -1,0 +1,96 @@
+# Particle-free PCL melt at 500 K - force-field check of the density against the published value
+# (Bačová et al., Open Research Europe 5:296 (2025)). Same chains as the composite, no nanoparticle.
+# Units: Angstrom, Kelvin, atm, g/cm3, kcal/mol.
+
+[system]
+bulk_glass = "data/final_45S5_bulk.xyz"
+output_dir = "runs/melt500_lopls"
+seed = 42
+replica = 1              # independent replicas differ in chain growth and Monte Carlo seeds
+xyz_wrap = "atom"        # XYZ output: "atom" = every atom inside the box, "molecule" = whole chains
+
+# ---------------------------------------------------------------- stage 1: cut
+[nanoparticle]
+radius = 20.0            # sphere radius; must stay below ~ (bulk box)/2 - 5 A
+center = "auto"          # "auto" = best of `center_trials` random centres, or [x, y, z]
+center_trials = 400
+bond_cutoff = 2.1        # Si-O / P-O bond criterion
+bulk_box = 0.0           # 0 = read "box=..." from the XYZ comment line
+hydroxyl_fraction = 0.0  # fraction of surface Na+ exchanged for H+ (Si-O- Na+ -> Si-OH); 0 = dry surface
+
+# ---------------------------------------------------------------- stage 2: build
+[composite]
+polymer_fraction = 0.4375  # amount of polymer grown (ratio to the cut particle), then the particle is deleted
+neat = true          # the glass is deleted after the chains are grown: particle-free control
+basis = "weight"         # "weight" (wt%) or "volume" (vol%)
+chain_length = 30        # caprolactone repeat units per chain (3442 g/mol)
+polymer_density = 0.93   # estimate used only to size the box before the NPT stages find the density
+build_density = 0.32     # polymer density while growing the chains
+min_distance = 1.7       # polymer-polymer clash distance during growth
+min_distance_glass = 2.6 # polymer-glass clash distance during growth
+torsion_trials = 20
+max_chain_restarts = 60
+
+# ---------------------------------------------------------------- interactions
+[forcefield]
+cutoff = 10.0            # LJ and real-space Coulomb cutoff
+skin = 2.0               # neighbour-list skin
+dsf_alpha = 0.2          # damped-shifted-force Coulomb damping (1/A)
+lj_tail = true           # long-range dispersion correction in volume moves
+cross_epsilon_scale = 1.0
+ester_variant = "lopls_ester"  # ester dihedrals from L-OPLS (Siu et al., 2012), table 2
+
+# ---------------------------------------------------------------- stage 3: Monte Carlo
+[mc]
+device = 0               # CUDA device index
+precision = "mixed"      # "mixed" (single pair terms, double accumulation) or "double"
+minimise_steps = 2000
+hmc_steps = 200          # mean leapfrog steps per hybrid-MC move (randomised +/-30 %); keep it long
+dt_fs = 0.8              # initial time step; tuned towards target_acceptance
+target_acceptance = 0.70
+hmc_mass = 12.0          # fictitious mass (amu) of every atom; 0 = physical masses
+dlnV = 0.004             # initial volume-move amplitude
+log_every = 10
+trajectory_every = 250
+checkpoint_every = 20
+
+# Schedule: 30 000 hybrid-MC moves in total (each move = 200 all-atom leapfrog steps,
+# plus 10 volume moves in the NPT stages).
+
+[[mc.stage]]
+name = "relax"
+ensemble = "nvt"
+T = 500.0
+moves = 50
+
+[[mc.stage]]
+name = "compress"
+ensemble = "ramp"
+T = 500.0
+moves = 300
+target_density_fraction = 0.9
+
+[[mc.stage]]
+name = "melt"
+ensemble = "npt"
+T = 500.0
+P = 1.0
+moves = 800
+volume_moves = 10
+
+[[mc.stage]]
+name = "equilibrate"
+ensemble = "npt"
+T = 500.0
+P = 1.0
+moves = 1500
+volume_moves = 10
+
+[[mc.stage]]
+name = "production"
+ensemble = "npt"
+T = 500.0
+P = 1.0
+moves = 1500
+volume_moves = 10
+tune = false
