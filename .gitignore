@@ -1,0 +1,37 @@
+# Python / Numba caches
+__pycache__/
+*.py[cod]
+*.nbc
+*.nbi
+
+# Virtual environments
+.venv/
+venv/
+env/
+
+# Monte Carlo outputs (available from the authors; see runs/README.md)
+runs/composite_r*/
+runs/neat_r*/
+runs/sensitivity_*/
+runs/melt500_*/
+runs/pooled/
+runs/extra_analysis/
+runs/comparison.json
+runs/comparison.md
+runs/*.log
+*.npz
+*.chk
+*.xyz.gz
+Bioglass_*/
+simulation.log
+
+# Manuscript material and reference PDFs (not part of this code release)
+literature/
+*.docx
+*.pdf
+
+# OS / editor
+.DS_Store
+Thumbs.db
+.idea/
+.vscode/
