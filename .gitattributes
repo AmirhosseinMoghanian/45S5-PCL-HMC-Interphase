@@ -1,0 +1,14 @@
+# Normalise text files to LF in the repository so the shell scripts stay runnable on Linux and macOS.
+* text=auto
+*.sh text eol=lf
+*.py text
+*.toml text
+*.md text
+*.csv text
+*.itp text
+*.gro text
+*.xyz text
+*.c text
+*.png binary
+*.npz binary
+*.chk binary
